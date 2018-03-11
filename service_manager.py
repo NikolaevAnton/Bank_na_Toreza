@@ -4,12 +4,15 @@ import money_manager
 client_money = money_manager.Money(0,0)
 # Инициилизирую счет под будущий депозит
 deposit = money_manager.Deposit(0,0,0)
+# Инициилизирую кредитную удавку
+credit = money_manager.Credit(0,0)
 # Инициизирую параметры для парсера
 parser = money_manager.Pars(0,'',0,'')
 DEPOSIT = "deposit"
+CREDIT = "credit"
 LOW_NOL = "<0"
 CHEK_MONEY = "chek money"
-UP_DEPOSIT = "up deposit"
+UP = "up"
 
 # код для парсирования строки ввода информации
 def parser_info(info, parametrs):
@@ -44,6 +47,15 @@ def money_calc(command):
             money_deposit += money_deposit * deposit.get_procent() / 100
             i += 1
         print("Через ", deposit.get_yaer(), " под процентами ", deposit.get_procent(), " на вашем счету окажется: ", money_deposit)
+    if command == CREDIT:
+        money_credit = credit.get_money_credit()
+        i = 1
+        print("Расчет кредита на три года")
+        while i < 4:
+            money_credit += money_credit * credit.get_procent() / 100
+            print("Год ", i, " # Сумма кредита будет равна: ", money_credit)
+            i += 1
+
 
 def chek_summ(command):
     if command == LOW_NOL:
@@ -61,7 +73,7 @@ def chek_summ(command):
             return False
         else:
             return True
-    elif command == UP_DEPOSIT:
+    elif command == UP: # не только для депозита можно использовать этот блок
         if parser.get_pr1() > client_money.get_x():
             print("сумма того что вы хотите положить под проценты больше количества ваших денег!")
             parser.set_pr1(0)
@@ -104,7 +116,7 @@ def bank_servise_deposit():
         while 1 > 0:
             if parser_info("банковский служащий: сколько класть на депозит? от 0 до максимума на вашем счете", 3):
 
-                if not chek_summ(UP_DEPOSIT):
+                if not chek_summ(UP):
                     continue
                 elif not chek_summ(LOW_NOL):
                     continue
@@ -142,3 +154,55 @@ def bank_servose_up_deposit():
                       deposit.get_money_deposit(), " депозит")
                 break
         break
+
+def bank_servise_credit():
+    while 1 > 0:
+        if credit.get_money_credit() > 0:
+            print("У вас уже взят кредит : ", credit.get_money_credit(), " под ", credit.get_procent(), " %")
+        print("банковский служащий: Здарвстуйте! Мы рады вас видеть! Хотите немного кредита? Y/N")
+        answer = input()
+        if not answer == "Y":
+            break
+
+        while 1 > 0:
+            if parser_info("Введите сумму кредита", 3):
+                if not chek_summ(LOW_NOL):
+                    continue
+            break
+        credit.give_credit(parser.get_pr1())
+        client_money.set_x(credit.get_money_credit())
+        while 1 > 0:
+            if parser_info("Введите процентную ставку", 3):
+                if not chek_summ(LOW_NOL):
+                    continue
+            break
+        print("Кредитные деньги поступили вам на счет")
+        print("Состояние счета: ", client_money.get_x())
+        credit.set_pocent(parser.get_pr1())
+        break
+
+def bank_servise_kill_credit():
+    if credit.get_money_credit() == 0:
+        print("банковский служащий: У вас нет кредита!")
+        bank_servise_credit()
+    print("У вас уже взят кредит : ", credit.get_money_credit(), " под ", credit.get_procent(), " %")
+    while 1 > 0:
+        while 1 > 0:
+            if parser_info("Введите сумму которой хотите погасить кредит", 3):
+                if not chek_summ(LOW_NOL):
+                    continue
+                if not chek_summ(CHEK_MONEY):
+                    bank_servise_put()
+                    continue
+                if not chek_summ(UP):
+                    continue
+            break
+        credit.kill_kredit(parser.get_pr1())
+        client_money.minus(parser.get_pr1())
+        print("На счете осталось ", client_money.get_x(), " Вы вывели на погашение кредита ", parser.get_pr1())
+        if credit.get_money_credit() == 0:
+            print("Ваш кредит погашен полностью!")
+        else:
+            print("Сумма на кредите: ", credit.get_money_credit())
+        break
+

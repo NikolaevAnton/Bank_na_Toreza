@@ -42,6 +42,29 @@ class Deposit:
     def get_yaer(self):
         return self.__time
 
+class Credit:
+    def __init__(self, money_credit, procent):
+        self.__money_credit = money_credit
+        self.__procent = procent
+
+    def get_money_credit(self):
+        return self.__money_credit
+
+    def set_money_credit(self, money_credit):
+        self.__money_credit = money_credit
+
+    def get_procent(self):
+        return self.__procent
+
+    def set_pocent(self, procent):
+        self.__procent = procent
+
+    def give_credit(self, money):
+        self.__money_credit += money
+
+    def kill_kredit(self, money):
+        self.__money_credit -= money
+
 class Pars:
     def __init__(self, pr1, pr2, pr3, pr4):
         self.__pr1 = pr1

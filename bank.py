@@ -7,7 +7,9 @@ def receptionist():
         print("1 # Сделать вклад.")
         print("2 # Свой вклад я хочу положить под проценты")
         print("3 # То, что я положил под проценты, я хочу вернуть в свой вклад")
-        print("5 # Выйти их приложения.")
+        print("4 # Пожалуй, возьму у вас кредит")
+        print("5 # Погасить кредит")
+        print("6 # Выйти из банка.")
         client_do = 0
         try:
             client_do = int(input("Выбирете вариант: "))
@@ -29,8 +31,18 @@ def receptionist():
             service_manager.bank_servose_up_deposit()
             continue
 
-        # Выход из метода
+        # Кредитное ярмо
+        elif client_do == 4:
+            service_manager.bank_servise_credit()
+            continue
+
+        # Высвобождение из оного
         elif client_do == 5:
+            service_manager.bank_servise_kill_credit()
+            continue
+
+        # Выход из метода
+        elif client_do == 6:
             break
 
         else:
@@ -41,7 +53,9 @@ def main():
     receptionist()
     print("У клиента на счету: ", service_manager.client_money.get_x())
     print("Вклад по проценты", service_manager.deposit.get_money_deposit())
-    service_manager.money_calc("deposit") # лучше здесь смотрелась бы глобальная константа
+    service_manager.money_calc(service_manager.DEPOSIT)
+    print("Кредит: ", service_manager.credit.get_money_credit(), " под ", service_manager.credit.get_procent(), "%")
+    service_manager.money_calc(service_manager.CREDIT)
 
 
 
