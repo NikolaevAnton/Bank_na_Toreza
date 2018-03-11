@@ -8,6 +8,8 @@ deposit = money_manager.Deposit(0,0,0)
 parser = money_manager.Pars(0,'',0,'')
 DEPOSIT = "deposit"
 LOW_NOL = "<0"
+CHEK_MONEY = "chek money"
+UP_DEPOSIT = "up deposit"
 
 # код для парсирования строки ввода информации
 def parser_info(info, parametrs):
@@ -51,6 +53,21 @@ def chek_summ(command):
             return False
         else:
             return True
+    elif command == CHEK_MONEY:
+        if client_money.get_x() == 0:
+            print("банковский служащий: банковский служащий: сделайте первый взнос, у вас на счету 0!")
+            parser.set_pr1(0)
+            return False
+        else:
+            return True
+    elif command == UP_DEPOSIT:
+        if parser.get_pr1() > client_money.get_x():
+            print("сумма того что вы хотите положить под проценты больше количества ваших денег!")
+            parser.set_pr1(0)
+            return False
+        else:
+            return True
+
 
 def receptionist():
     print("Банк на Тореза")
@@ -82,23 +99,21 @@ def receptionist():
 
          # Расчет вклада под проценты
         elif client_do == 2:
-            if client_money.get_x() == 0:
-                print("банковский служащий: сделайте первый взнос, у вас на счету 0")
+
+            if not chek_summ(CHEK_MONEY):
                 continue
             print("банковский служащий: Выбирете процентную ставку и время вклада")
-            parser_info("банковский служащий: введите данные в формате 5 % 2 года",4)
+            if not parser_info("банковский служащий: введите данные в формате 5 % 2 года",4):
+                continue
             print("На вашем счету сейчас ", client_money.get_x())
             print("На депозите: ", deposit.get_money_deposit())
-
-            #Здесь нужну функция проверки ввода информации
-
             deposit.set_procent(parser.get_pr1())
             deposit.set_year(parser.get_pr3())
 
 
             if parser_info("банковский служащий: сколько класть на депозит? от 0 до максимума на вашем счете",3):
-                if parser.get_pr1() > client_money.get_x():
-                    print("сумма того что вы хотите положить под проценты больше количества ваших денег!")
+
+                if not chek_summ(UP_DEPOSIT):
                     continue
                 elif not chek_summ(LOW_NOL):
                     continue
