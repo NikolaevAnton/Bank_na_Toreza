@@ -57,7 +57,6 @@ def main():
     service_manager.money_calc(service_manager.DEPOSIT)
     print("Кредит: ", service_manager.credit.get_money_credit(), " под ", service_manager.credit.get_procent(), "%")
     service_manager.money_calc(service_manager.CREDIT)
-    #data_base_script.create_db()
     data_base_script.add_money(service_manager.client_money.get_x(),service_manager.deposit.get_money_deposit(),service_manager.credit.get_money_credit())
     print("История транзакций:")
 
