@@ -22,7 +22,7 @@ def chek_db():
 def add_money(money,deposit,credit):
     conn = sqlite3.connect('bank.sqlite')
     cursor = conn.cursor()
-    
+
     #так делать небезопасно, программа небезопасна к SQL атакам
     #cursor.execute("INSERT INTO money_table (money,deposit,credit) VALUES ('%d','%d', '%d')"%(money,deposit,credit))
 
