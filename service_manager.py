@@ -1,4 +1,5 @@
 import money_manager
+import client_manager
 
 # Инициизирую здесь нулевую сумму на счете
 client_money = money_manager.Money(0,0)
@@ -8,6 +9,9 @@ deposit = money_manager.Deposit(0,0,0)
 credit = money_manager.Credit(0,0)
 # Инициизирую параметры для парсера
 parser = money_manager.Pars(0,'',0,'')
+# Инициализирую клиента
+client = client_manager.Client("","","")
+
 DEPOSIT = "deposit"
 CREDIT = "credit"
 LOW_NOL = "<0"
@@ -19,7 +23,17 @@ def parser_info(info, parametrs):
     text = input(info)
     if parametrs == 3:
         text += " _"
+
     list = text.split()
+
+    # Парсинг имени клиента
+    if parametrs == 5:
+        if list[0] == '' or list[1] == '':
+            raise ValueError
+        parser.set_pr1(list[0])
+        parser.set_pr2(list[1])
+        return True
+
     try:
         parser.set_pr1(int(list[0]))
         if list[1] == '':

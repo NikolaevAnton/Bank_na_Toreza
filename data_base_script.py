@@ -23,9 +23,6 @@ def add_money(money,deposit,credit):
     conn = sqlite3.connect('bank.sqlite')
     cursor = conn.cursor()
 
-    #так делать небезопасно, программа небезопасна к SQL атакам
-    #cursor.execute("INSERT INTO money_table (money,deposit,credit) VALUES ('%d','%d', '%d')"%(money,deposit,credit))
-
     #благонравно использую тюпл, согласно DB-API
     t = (money, deposit, credit)
     cursor.execute("insert into money_table (money,deposit,credit) values (?, ?, ?)", t)
