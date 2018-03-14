@@ -9,8 +9,7 @@ deposit = money_manager.Deposit(0,0,0)
 credit = money_manager.Credit(0,0)
 # Инициизирую параметры для парсера
 parser = money_manager.Pars(0,'',0,'')
-# Инициализирую клиента
-client = client_manager.Client("","","")
+
 
 DEPOSIT = "deposit"
 CREDIT = "credit"

@@ -25,21 +25,24 @@ def chek_db():
 def add_money(money,deposit,credit):
     conn = sqlite3.connect('bank.sqlite')
     cursor = conn.cursor()
+    # Передаем информацию о последней операции в базу данных клиента
 
     #благонравно использую тюпл, согласно DB-API
     t = (money, deposit, credit)
     cursor.execute("insert into money_table (money,deposit,credit) values (?, ?, ?)", t)
-
+    operation = str(cursor.lastrowid)
     conn.commit()
     cursor.close()
     conn.close()
+    set_operation(operation)
 
 def add_client(name, last_name, pin):
     conn = sqlite3.connect("bank.sqlite")
     cursor = conn.cursor()
 
-    t = (name, last_name, pin)
-    cursor.execute("insert into client_table (name, last_name, pin) values (?, ?, ?)", t)
+    t = (name, last_name, pin, " ")
+    cursor.execute("insert into client_table (name, last_name, pin, operations) values (?, ?, ?, ?)", t)
+    client_manager.current_client.set_id(str(cursor.lastrowid))
 
     conn.commit()
     cursor.close()
@@ -63,14 +66,27 @@ def list_clients_pin_in_DB():
 
 
 
-def set_operation(id):
+def set_operation(operation):
     conn = sqlite3.connect('bank.sqlite')
     cursor = conn.cursor()
-    # Здесь надо будет зайти в operations и взять от туда начение строки
-    id_str = str(id) + " "
-    # А здесь сложить старое значение и id_str, разделить пробелом
-    t = (id_str)
-    cursor.execute("insert into client_table (operations) values (?)", t)
+    cursor.execute("SELECT * FROM client_table")
+    row = cursor.fetchone()
+    t = ""
+    while row is not None:
+        t += str(row[4])
+        row = cursor.fetchone()
+    t += operation
+    cursor.close()
+    conn.close()
+
+    conn = sqlite3.connect('bank.sqlite')
+    cursor = conn.cursor()
+    # Заменяем значение operations в таблице клиента, ориентируясь на его текущий id
+    cursor.execute('''SELECT operations FROM client_table WHERE id=?''', (client_manager.current_client.get_id(),))
+    example = cursor.fetchone()
+    cursor.execute('''UPDATE client_table SET operations = ? WHERE id = ?''', (t,  int(client_manager.current_client.get_id())))
+    conn.commit()
+
     cursor.close()
     conn.close()
 
@@ -81,15 +97,10 @@ def info():
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM money_table')
     row = cursor.fetchone()
-    id = 0
     while row is not None:
         print("id:" + str(row[0]) + " Деньги на счету: " + str(row[1]) + " | На депозите: " + str(row[2]) + " | В кредите: " + str(row[3]))
-        id = row[0] # Заходя в info, происходит запись последнего id операции
         row = cursor.fetchone()
 
     # закрываем соединение с базой
     cursor.close()
     conn.close()
-
-    # Передаем информацию о последней операции в базу данных клиента
-    #set_operation(id)

@@ -21,26 +21,41 @@ def receptionist():
         # Вклад денег на счет
         if client_do == 1:
             service_manager.bank_servise_put()
+            data_base_script.add_money(service_manager.client_money.get_x(),
+                                       service_manager.deposit.get_money_deposit(),
+                                       service_manager.credit.get_money_credit())
             continue
 
          # Расчет вклада под проценты
         elif client_do == 2:
             service_manager.bank_servise_deposit()
+            data_base_script.add_money(service_manager.client_money.get_x(),
+                                       service_manager.deposit.get_money_deposit(),
+                                       service_manager.credit.get_money_credit())
             continue
 
         # Вывод денег, отложенных на депозит на основной счет
         elif client_do == 3:
             service_manager.bank_servose_up_deposit()
+            data_base_script.add_money(service_manager.client_money.get_x(),
+                                       service_manager.deposit.get_money_deposit(),
+                                       service_manager.credit.get_money_credit())
             continue
 
         # Кредитное ярмо
         elif client_do == 4:
             service_manager.bank_servise_credit()
+            data_base_script.add_money(service_manager.client_money.get_x(),
+                                       service_manager.deposit.get_money_deposit(),
+                                       service_manager.credit.get_money_credit())
             continue
 
         # Высвобождение из оного
         elif client_do == 5:
             service_manager.bank_servise_kill_credit()
+            data_base_script.add_money(service_manager.client_money.get_x(),
+                                       service_manager.deposit.get_money_deposit(),
+                                       service_manager.credit.get_money_credit())
             continue
 
         # Выход из метода
@@ -62,7 +77,7 @@ def main():
     service_manager.money_calc(service_manager.DEPOSIT)
     print("Кредит: ", service_manager.credit.get_money_credit(), " под ", service_manager.credit.get_procent(), "%")
     service_manager.money_calc(service_manager.CREDIT)
-    data_base_script.add_money(service_manager.client_money.get_x(),service_manager.deposit.get_money_deposit(),service_manager.credit.get_money_credit())
+    #data_base_script.add_money(service_manager.client_money.get_x(),service_manager.deposit.get_money_deposit(),service_manager.credit.get_money_credit())
     print("История транзакций:")
 
     data_base_script.info()

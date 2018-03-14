@@ -4,10 +4,15 @@ import data_base_script
 
 class Client:
 
-    def __init__(self, name, last_name, pin):
+    def __init__(self, id, name, last_name, pin, operations):
+        self.__id = id
         self.__name = name
         self.__last_name = last_name
         self.__pin = pin
+        self.__operations = operations
+
+    def get_id(self):
+        return self.__id
 
     def get_name(self):
         return self.__name
@@ -18,6 +23,12 @@ class Client:
     def get_pin(self):
         return self.__pin
 
+    def get_operations(self):
+        return self.__operations
+
+    def set_id(self, id):
+        self.__id = id
+
     def set_name(self, name):
         self.__name = name
 
@@ -27,8 +38,15 @@ class Client:
     def set_pin(self, pin):
         self.__pin = pin
 
+    def set_operations(self, operations):
+        self.__operations = operations
+
+    def add_operations(self, operations):
+        self.__operations += self.__operations + " " + operations + " "
+
 client_ids = []
-id_client = 0
+current_client = Client(0,"","","","")
+
 
 def chek_pin(pin):
     i = 0
@@ -43,14 +61,23 @@ def chek_pin(pin):
     return True
 
 def pin_generate():
-    i = 0
-    pin = ""
-    while i < 4:
-        pin += str(random.randint(0,9))
-        i += 1
+    f = 0
 
-    # Здесь нужно будет сделать запрос в БД, есть ли такой pin. Если есть - еще раз рекурсивно выполнить pin_generate()
-    # Не надо. Я буду запрашивать в коллекции данные о пин кодах клиентов
+    pin = ""
+    while True:
+        i = 0
+        while i < 4:
+            pin += str(random.randint(0, 9))
+            i += 1
+
+        if not check_client(pin):
+            break
+        # Тут думаю для того, чтобы избежать бесконечного цикла в случае когда все пинкоды заняты,
+        #  надо высчитать максимальное количестов попыток.
+        if f == 10000:
+            print("Количество пользователей превышает возможности данного банка. (")
+            exit(0)
+        f += 1
     return pin
 
 def create_client():
@@ -58,21 +85,21 @@ def create_client():
     while 1 > 0:
         if service_manager.parser_info("Введите ваше имя и фамилию разделенные пробелом # ", 5):
             # Запоминаем в оперативной памяти клиента
-            service_manager.client.set_name(service_manager.parser.get_pr1())
-            service_manager.client.set_last_name(service_manager.parser.get_pr2())
+            current_client.set_name(service_manager.parser.get_pr1())
+            current_client.set_last_name(service_manager.parser.get_pr2())
             # Генерируем пин-код
-            service_manager.client.set_pin(pin_generate())
+            current_client.set_pin(pin_generate())
 
             print(" ### Ваши параметры ###")
-            print(" Имя: ", service_manager.client.get_name())
-            print(" Фамилия: ", service_manager.client.get_last_name())
-            print(" Пин код: ", service_manager.client.get_pin())
+            print(" Имя: ", current_client.get_name())
+            print(" Фамилия: ", current_client.get_last_name())
+            print(" Пин код: ", current_client.get_pin())
             answer = input("Y/N")
             if answer == "Y":
                 data_base_script.add_client(
-                    service_manager.client.get_name(),
-                    service_manager.client.get_last_name(),
-                    service_manager.client.get_pin()
+                    current_client.get_name(),
+                    current_client.get_last_name(),
+                    current_client.get_pin()
                 )
                 break
 
@@ -82,7 +109,10 @@ def check_client(pin):
         return False
     for client in client_ids:
         if int(client[3]) == int(pin):
-            print("Здравствуйте ", client[1], " ", client[2], "!")
+            current_client.set_id(client[0])
+            current_client.set_name(client[1])
+            current_client.set_last_name(client[2])
+            current_client.set_pin(client[3])
             return True
     return False
 
@@ -112,3 +142,5 @@ def name_client():
 
             else:
                 exit(0)
+
+    print("Здравствуйте ", current_client.get_name(), " ", current_client.get_last_name(), "!")
