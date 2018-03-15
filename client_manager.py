@@ -48,6 +48,10 @@ client_ids = []
 current_client = Client(0,"","","","")
 
 
+def full_info_client():
+    return current_client.get_name() + " " + current_client.get_last_name() + \
+           " # Пин код: " + str(current_client.get_pin()) + " #"
+
 def chek_pin(pin):
     i = 0
     for p in pin:

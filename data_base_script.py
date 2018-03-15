@@ -153,16 +153,41 @@ def set_operation(operation):
 #Функция вывода информации
 def info():
     # Выводим информацию для текущего пользователя
-    id = client_manager.current_client.get_id()
+    pin = pin_four(client_manager.current_client.get_pin())
+    list_ids = []
+    conn = sqlite3.connect('bank.sqlite')
+    cursor = conn.cursor()
+    sql_command = ("SELECT * FROM name_client_" + pin)
+    cursor.execute(sql_command)
+    row = cursor.fetchone()
+    while row is not None:
+        list_ids.append(row[1])
+        row = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
     conn = sqlite3.connect('bank.sqlite')
     cursor = conn.cursor()
     cursor.execute('SELECT * FROM money_table')
     row = cursor.fetchone()
+    print("История транзакций для " + client_manager.full_info_client())
+    i = 1
     while row is not None:
-        print("id:" + str(row[0]) + " Деньги на счету: " + str(row[1]) + " | На депозите: " + str(row[2]) + " | В кредите: " + str(row[3]))
+
+        if super_any(list_ids,row[0]):
+            print("№:" + str(i) + " Внесение денег на счет: " + str(row[1]) + " | На депозит: " + str(
+                row[2]) + " | В кредит: " + str(row[3]))
+            i += 1
+
         row = cursor.fetchone()
 
     # закрываем соединение с базой
     cursor.close()
     conn.close()
+
+def super_any(list_ids, id):
+    for idx in list_ids:
+        if idx == id:
+            return True
+
+    return False
