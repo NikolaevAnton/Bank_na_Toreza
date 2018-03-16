@@ -8,16 +8,13 @@ def create_db():
     conn = sqlite3.connect("bank.sqlite")
     cursor = conn.cursor()
     cursor.execute('''CREATE TABLE money_table (id Integer PRIMARY KEY ASC, money NUMBER, deposit NUMBER, credit NUMBER)''')
-    cursor.execute('''CREATE TABLE client_table (id Integer PRIMARY KEY ASC, name STRING, last_name STRING, pin STRING, operations STRING)''')
+    cursor.execute('''CREATE TABLE client_table (id Integer PRIMARY KEY ASC, name STRING, last_name STRING, pin STRING)''')
     conn.commit()
     cursor.close()
     conn.close()
-#id INTEGER PRIMARY KEY ASC, money int, deposit int, credit int
-#STRING - использовать для ввода/вывода строк
 
-# Будет вызываться при каждой операции с деньгами
-# для того чтобы записать id операции в таблицу операций пользователя
-
+# Пин год вводятся цифрами и переводится в строку. Где-то теряются нули в начале пинкода
+# если они там были
 def pin_four(pin):
     pincode = str(pin)
     if len(pincode) == 0:
@@ -31,44 +28,8 @@ def pin_four(pin):
     else:
         return pincode
 
-def check_table_for_client_operation(pin, operation):
-    name_client_operation = "name_client_" + str(pin)
-    #проверка есть ли клиент в бд
-    try:
-        conn = sqlite3.connect("bank.sqlite")
-        cursor = conn.cursor()
-        sql_command = ("SELECT * FROM " + name_client_operation)
-        cursor.execute(sql_command)
-        # Таблица пользователя есть раз дошли до этой строчки, добваляем в нее поля
-        sql_command = ("INSERT INTO " + name_client_operation + "(id_operation) values (?)")
-        cursor.execute(sql_command, (operation,))
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-    except sqlite3.OperationalError:
-        # Таблицы пользователя нет, создаем
-        create_table_for_client_operation(operation, pin)
-
-
-
-
-def create_table_for_client_operation(operation, pin):
-
-    name_client_operation = "name_client_" + str(pin)
-    # Если зашли под пользователя, который уже есть, то обращаемся к таблице для данного пользователя
-
-    conn = sqlite3.connect("bank.sqlite")
-    cursor = conn.cursor()
-    sql_command = ("CREATE TABLE " + name_client_operation +" (id Integer PRIMARY KEY ASC, id_operation STRING)")
-    cursor.execute(sql_command)
-    sql_command = ("INSERT INTO " + name_client_operation + " (id_operation) VALUES(?)")
-    cursor.execute(sql_command, (operation,))
-    conn.commit()
-    cursor.close()
-    conn.close()
-
-
+# Самая первая функция, вызываемая из main()
+# проверяет, есть ли база данных. Если нет - создает
 def chek_db():
     files = os.listdir(".")
     for file in files:
@@ -91,18 +52,19 @@ def add_money(money,deposit,credit):
     conn.close()
     set_operation(operation)
 
+# добавдение информации о клиенте в таблицу client_name
 def add_client(name, last_name, pin):
     conn = sqlite3.connect("bank.sqlite")
     cursor = conn.cursor()
-
-    t = (name, last_name, pin, " ")
-    cursor.execute("insert into client_table (name, last_name, pin, operations) values (?, ?, ?, ?)", t)
+    t = (name, last_name, pin)
+    cursor.execute("insert into client_table (name, last_name, pin) values (?, ?, ?)", t)
     client_manager.current_client.set_id(str(cursor.lastrowid))
-
     conn.commit()
     cursor.close()
     conn.close()
+    create_table_for_client_operation(None,pin) # создаем пустую таблицу транзакций клиента
 
+# Создаем список имеющихся клиентов
 def list_clients_pin_in_DB():
     conn = sqlite3.connect("bank.sqlite")
     cursor = conn.cursor()
@@ -119,35 +81,45 @@ def list_clients_pin_in_DB():
     cursor.close()
     conn.close()
 
+# Создание таблицы на клиента в формате name_client_пин. Также
+# добавляем туда id операции, чтобы в последующем из таблицы money_table
+# взять значения транзакций
+def create_table_for_client_operation(operation, pin):
 
+    name_client_operation = "name_client_" + str(pin)
+    conn = sqlite3.connect("bank.sqlite")
+    cursor = conn.cursor()
+    sql_command = ("CREATE TABLE " + name_client_operation +" (id Integer PRIMARY KEY ASC, id_operation STRING)")
+    cursor.execute(sql_command)
+    sql_command = ("INSERT INTO " + name_client_operation + " (id_operation) VALUES(?)")
+    cursor.execute(sql_command, (operation,))
+    conn.commit()
+    cursor.close()
+    conn.close()
 
+# Добавляем во вспомогательную таблицу пользователь - транзакция информацию про id операции с деньгами
+# Если такой таблицы нет - создаем ее. Не знаю, корректно ли создавать для каждого пользователя
+# свою таблицу, но так нагляднее и проще, чем писать номера операций в формате _1_2_3_18 в специальном поле
+# в таблице client_table в каком либо дополнительном поле
 def set_operation(operation):
     pin = pin_four(client_manager.current_client.get_pin())
-    check_table_for_client_operation(pin,operation)
-    conn = sqlite3.connect('bank.sqlite')
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM client_table")
-    row = cursor.fetchone()
-    t = ""
-    while row is not None:
-        x = ("{0}").format(row[3])
-        x_int = int(x)
-        y_int = int(client_manager.current_client.get_pin())
-        if x_int == y_int:
-            t += '_' + str(row[4]) + "_"
-        row = cursor.fetchone()
-    t += "_" + operation + "_"
-    cursor.close()
-    conn.close()
+    name_client_operation = "name_client_" + str(pin)
+    # проверка есть ли клиент в бд
+    try:
+        conn = sqlite3.connect("bank.sqlite")
+        cursor = conn.cursor()
+        sql_command = ("SELECT * FROM " + name_client_operation)
+        cursor.execute(sql_command)
+        # Таблица пользователя есть раз дошли до этой строчки, добваляем в нее поля
+        sql_command = ("INSERT INTO " + name_client_operation + "(id_operation) values (?)")
+        cursor.execute(sql_command, (operation,))
+        conn.commit()
+        cursor.close()
+        conn.close()
 
-    conn = sqlite3.connect('bank.sqlite')
-    cursor = conn.cursor()
-    # Заменяем значение operations в таблице клиента, ориентируясь на его текущий id
-    cursor.execute('''UPDATE client_table SET operations = ? WHERE id = ?''', (t,  int(client_manager.current_client.get_id())))
-    conn.commit()
-
-    cursor.close()
-    conn.close()
+    except sqlite3.OperationalError:
+        # Таблицы пользователя нет, создаем
+        create_table_for_client_operation(operation, pin)
 
 
 #Функция вывода информации
@@ -181,10 +153,10 @@ def info():
 
         row = cursor.fetchone()
 
-    # закрываем соединение с базой
     cursor.close()
     conn.close()
 
+# вспомогательная функция для проверки есть ли какое значение в списке
 def super_any(list_ids, id):
     for idx in list_ids:
         if idx == id:

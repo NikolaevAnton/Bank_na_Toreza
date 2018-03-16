@@ -1,5 +1,5 @@
 import money_manager
-import client_manager
+import parser_for_input
 
 # Инициизирую здесь нулевую сумму на счете
 client_money = money_manager.Money(0,0)
@@ -8,7 +8,7 @@ deposit = money_manager.Deposit(0,0,0)
 # Инициилизирую кредитную удавку
 credit = money_manager.Credit(0,0)
 # Инициизирую параметры для парсера
-parser = money_manager.Pars(0,'',0,'')
+parser = parser_for_input.parser
 
 
 DEPOSIT = "deposit"
@@ -16,40 +16,6 @@ CREDIT = "credit"
 LOW_NOL = "<0"
 CHEK_MONEY = "chek money"
 UP = "up"
-
-# код для парсирования строки ввода информации
-def parser_info(info, parametrs):
-    text = input(info)
-    if parametrs == 3:
-        text += " _"
-
-    list = text.split()
-
-    # Парсинг имени клиента
-    if parametrs == 5:
-        if list[0] == '' or list[1] == '':
-            raise ValueError
-        parser.set_pr1(list[0])
-        parser.set_pr2(list[1])
-        return True
-
-    try:
-        parser.set_pr1(int(list[0]))
-        if list[1] == '':
-            raise ValueError
-        parser.set_pr2(list[1])
-        if parametrs == 4:
-            if list[3] == '':
-                raise ValueError
-            parser.set_pr3(int(list[2]))
-            parser.set_pr4(list[3])
-    except ValueError:
-        print("банковский служащий: Корректно вводите!")
-        return False
-    except IndexError:
-        print("банковский служащий: Корректно вводите!")
-        return False
-    return True
 
 # Высчитываем сумму с процентами
 def money_calc(command):
@@ -98,7 +64,7 @@ def chek_summ(command):
 def bank_servise_put():
     print("Сколько вы хотите положить денег?")
     while 1 > 0:
-        if parser_info("Вводите деньги в формате: 100 RUB", 2):
+        if parser_for_input.parser_info("Вводите деньги в формате: 100 RUB", 2):
             if chek_summ(LOW_NOL):
                 client_money.summ(parser.get_pr1())
                 print("Вы положили на свой счет: ", client_money.get_x())
@@ -117,7 +83,7 @@ def bank_servise_deposit():
                 break
         print("банковский служащий: Выбирете процентную ставку и время вклада")
         while 1 > 0:
-            if not parser_info("банковский служащий: введите данные в формате 5 % 2 года", 4):
+            if not parser_for_input.parser_info("банковский служащий: введите данные в формате 5 % 2 года", 4):
                 continue
             else:
                 break
@@ -127,7 +93,7 @@ def bank_servise_deposit():
         deposit.set_year(parser.get_pr3())
 
         while 1 > 0:
-            if parser_info("банковский служащий: сколько класть на депозит? от 0 до максимума на вашем счете", 3):
+            if parser_for_input.parser_info("банковский служащий: сколько класть на депозит? от 0 до максимума на вашем счете", 3):
 
                 if not chek_summ(UP):
                     continue
@@ -143,7 +109,7 @@ def bank_servise_deposit():
                     print("расчет процентов")
                     money_calc(DEPOSIT)
                     break
-        break # конец цикла в начале функции
+        break
 
 def bank_servose_up_deposit():
     while 1 > 0:
@@ -153,7 +119,7 @@ def bank_servose_up_deposit():
             continue
         print("банковский служащий: на вашем депозите ", deposit.get_money_deposit())
         while 1 > 0:
-            if parser_info("Введите сумму, которую нужно перевести с вашего депозита на основной счет", 3):
+            if parser_for_input.parser_info("Введите сумму, которую нужно перевести с вашего депозита на основной счет", 3):
 
                 if not chek_summ(LOW_NOL):
                     continue
@@ -178,14 +144,14 @@ def bank_servise_credit():
             break
 
         while 1 > 0:
-            if parser_info("Введите сумму кредита", 3):
+            if parser_for_input.parser_info("Введите сумму кредита", 3):
                 if not chek_summ(LOW_NOL):
                     continue
             break
         credit.give_credit(parser.get_pr1())
         client_money.set_x(credit.get_money_credit())
         while 1 > 0:
-            if parser_info("Введите процентную ставку", 3):
+            if parser_for_input.parser_info("Введите процентную ставку", 3):
                 if not chek_summ(LOW_NOL):
                     continue
             break
@@ -201,7 +167,7 @@ def bank_servise_kill_credit():
     print("У вас уже взят кредит : ", credit.get_money_credit(), " под ", credit.get_procent(), " %")
     while 1 > 0:
         while 1 > 0:
-            if parser_info("Введите сумму которой хотите погасить кредит", 3):
+            if parser_for_input.parser_info("Введите сумму которой хотите погасить кредит", 3):
                 if not chek_summ(LOW_NOL):
                     continue
                 if not chek_summ(CHEK_MONEY):

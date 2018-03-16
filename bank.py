@@ -61,9 +61,6 @@ def receptionist():
             print("Введите корректный вариант, чтобы банковский служащий разобрался с вашей проблемой!")
 
 
-
-
-
 def main():
     client_manager.name_client()
     receptionist()

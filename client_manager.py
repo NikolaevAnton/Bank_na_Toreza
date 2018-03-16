@@ -1,15 +1,15 @@
 import random
 import service_manager
 import data_base_script
+import parser_for_input
 
 class Client:
 
-    def __init__(self, id, name, last_name, pin, operations):
+    def __init__(self, id, name, last_name, pin):
         self.__id = id
         self.__name = name
         self.__last_name = last_name
         self.__pin = pin
-        self.__operations = operations
 
     def get_id(self):
         return self.__id
@@ -23,9 +23,6 @@ class Client:
     def get_pin(self):
         return self.__pin
 
-    def get_operations(self):
-        return self.__operations
-
     def set_id(self, id):
         self.__id = id
 
@@ -38,15 +35,9 @@ class Client:
     def set_pin(self, pin):
         self.__pin = pin
 
-    def set_operations(self, operations):
-        self.__operations = operations
-
-    def add_operations(self, operations):
-        self.__operations += self.__operations + " " + operations + " "
-
 client_ids = []
-current_client = Client(0,"","","","")
-
+current_client = Client(0,"","","")
+parser = parser_for_input.parser
 
 def full_info_client():
     return current_client.get_name() + " " + current_client.get_last_name() + \
@@ -87,10 +78,10 @@ def pin_generate():
 def create_client():
     print(" ### Регистрация  клиента банка ###")
     while 1 > 0:
-        if service_manager.parser_info("Введите ваше имя и фамилию разделенные пробелом # ", 5):
+        if  parser_for_input.parser_info("Введите ваше имя и фамилию разделенные пробелом # ",5):
             # Запоминаем в оперативной памяти клиента
-            current_client.set_name(service_manager.parser.get_pr1())
-            current_client.set_last_name(service_manager.parser.get_pr2())
+            current_client.set_name(parser.get_pr1())
+            current_client.set_last_name(parser.get_pr2())
             # Генерируем пин-код
             current_client.set_pin(pin_generate())
 
